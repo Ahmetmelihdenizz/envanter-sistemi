@@ -38,11 +38,10 @@ npm run dev
 3. **Cihaz Yönet** - IT envanterini takip et
 4. **Servis Takip** - Destek kayıtlarını yönet
 
-## 📱 Screenshots
 
-*Yakında eklenecek...*
 
 ---
 
 **Geliştiren:** [Melih Deniz](https://github.com/ahmetmelihdenizz)  
 **Proje Durumu:** ✅ Production Ready
+
