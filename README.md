@@ -1,31 +1,48 @@
-﻿# envanter-sistemi
+# 📊 Envanter Yönetim Sistemi
 
-> # (İsteğe bağlı) README oluştur
->> echo "# envanter-sistemi" >> README.md
->> 
->> git init
->> git add .
->> git commit -m "first commit"
->> git branch -M main
->> 
->> # Eğer daha önce yanlış origin eklediysen önce kaldır
->> git remote remove origin 2>$null
->> 
->> git remote add origin https://github.com/Ahmetmelihdenizz/envanter-sistemi.git
->> git push -u origin main
->>
-Reinitialized existing Git repository in C:/Users/ahmetmelihdenizz/envanter-sistemi/.git/
-[main 1b764ee] first commit
- 3 files changed, 0 insertions(+), 0 deletions(-)
- create mode 100644 README.md
-Enumerating objects: 3801, done.
-Counting objects: 100% (3801/3801), done.
-Delta compression using up to 12 threads
-Compressing objects: 100% (3595/3595), done.
-Writing objects: 100% (3801/3801), 7.25 MiB | 1.46 MiB/s, done.
-Total 3801 (delta 699), reused 0 (delta 0), pack-reused 0 (from 0)
-remote: Resolving deltas: 100% (699/699), done.
-To https://github.com/Ahmetmelihdenizz/envanter-sistemi.git
- * [new branch]      main -> main
-branch 'main' set up to track 'origin/main'.
-PS C:\Users\ahmetmelihdenizz\envanter-sistemi> 
+Modern, güvenli ve multi-tenant IT envanter yönetim sistemi. JWT authentication ve rol bazlı yetkilendirme ile küçük-orta ölçekli şirketler için geliştirildi.
+
+## 🚀 Hızlı Başlangıç
+
+```bash
+npm install
+npm run dev
+```
+**→** http://localhost:3000 adresine git ve ilk admin hesabını oluştur!
+
+## ✨ Özellikler
+
+🏢 **Multi-Tenant** - Çoklu organizasyon desteği  
+🔐 **JWT Auth** - Güvenli kimlik doğrulama  
+👥 **Role Management** - Admin/Okuyucu rolleri  
+📱 **Responsive** - Mobil uyumlu arayüz  
+🛡️ **Security** - Rate limiting, CORS, helmet  
+
+## 💻 Teknolojiler
+
+**Backend:** Node.js, Express, SQLite, JWT  
+**Frontend:** JavaScript, Bootstrap 5, Fetch API  
+**Security:** bcryptjs, CORS, Rate Limiting  
+
+## 🏗️ Mimari
+
+- **Multi-tenant database** design
+- **RESTful API** endpoints  
+- **MVC pattern** implementation
+- **Middleware-based** security
+
+## 🎯 Kullanım
+
+1. **Kayıt Ol** - İlk kullanıcı admin olur
+2. **Müşteri Ekle** - Şirket bilgilerini kaydet  
+3. **Cihaz Yönet** - IT envanterini takip et
+4. **Servis Takip** - Destek kayıtlarını yönet
+
+## 📱 Screenshots
+
+*Yakında eklenecek...*
+
+---
+
+**Geliştiren:** [Melih Deniz](https://github.com/ahmetmelihdenizz)  
+**Proje Durumu:** ✅ Production Ready
