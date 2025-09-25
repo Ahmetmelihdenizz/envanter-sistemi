@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servis Kayıtları - Envanter Sistemi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/app.js"></script>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard.html">📊 Envanter Sistemi</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard.html">🏠 Ana Sayfa</a>
+                <a class="nav-link" href="#" onclick="logout()">🚪 Çıkış</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">🔧 Servis Kayıtları</h1>
+            <div class="d-flex gap-2">
+                <select id="durumFilter" class="form-select" style="width: 150px;">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="acik">Açık</option>
+                    <option value="devam_ediyor">Devam Ediyor</option>
+                    <option value="kapatildi">Kapatıldı</option>
+                </select>
+                <select id="musteriFilter" class="form-select" style="width: 200px;">
+                    <option value="">Tüm Müşteriler</option>
+                </select>
+                <input type="text" id="searchInput" class="form-control" placeholder="Konu veya açıklama ara..."
+                    style="width: 300px;">
+                <button class="btn btn-primary" onclick="loadServiceRecords()">🔍 Ara</button>
+                <button id="btnAdd" class="btn btn-success" onclick="showAddModal()">➕ Yeni Kayıt</button>
+            </div>
+        </div>
+
+        <div id="errorMessage" style="display: none;"></div>
+        <div id="successMessage" style="display: none;"></div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Müşteri</th>
+                                <th>Cihaz</th>
+                                <th>Konu</th>
+                                <th>Durum</th>
+                                <th>Öncelik</th>
+                                <th>Açılış</th>
+                                <th>Kapanış</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serviceTableBody">
+                            <!-- Dinamik içerik -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="serviceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Servis Kaydı</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="serviceForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="musteri_id" class="form-label">Müşteri *</label>
+                                    <select class="form-select" id="musteri_id" required>
+                                        <option value="">Müşteri seçin...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cihaz_id" class="form-label">Cihaz</label>
+                                    <select class="form-select" id="cihaz_id">
+                                        <option value="">Cihaz seçin...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="konu" class="form-label">Konu *</label>
+                                    <input type="text" class="form-control" id="konu" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="oncelik" class="form-label">Öncelik</label>
+                                    <select class="form-select" id="oncelik">
+                                        <option value="dusuk">Düşük</option>
+                                        <option value="orta" selected>Orta</option>
+                                        <option value="yuksek">Yüksek</option>
+                                        <option value="kritik">Kritik</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="aciklama" class="form-label">Açıklama</label>
+                                    <textarea class="form-control" id="aciklama" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Durum Değiştir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="statusForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="statusRecordId">
+                        <div class="mb-3">
+                            <label for="yeni_durum" class="form-label">Yeni Durum</label>
+                            <select class="form-select" id="yeni_durum" required>
+                                <option value="acik">Açık</option>
+                                <option value="devam_ediyor">Devam Ediyor</option>
+                                <option value="kapatildi">Kapatıldı</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-warning">Durumu Değiştir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        if (!checkAuth()) {
+            window.location.href = '/login.html';
+        }
+
+        const isAdmin = getRole() === 'admin';
+        if (!isAdmin) {
+            showIfAdmin(document.getElementById('btnAdd'));
+        }
+
+        let serviceRecords = [];
+        let customers = [];
+        let devices = [];
+        const serviceModal = new bootstrap.Modal(document.getElementById('serviceModal'));
+        const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+
+        // Sayfa yüklendiğinde verileri getir
+        loadInitialData();
+
+        async function loadInitialData() {
+            try {
+                await Promise.all([
+                    loadCustomers(),
+                    loadDevices(),
+                    loadServiceRecords()
+                ]);
+            } catch (error) {
+                showError('Veriler yüklenirken hata: ' + error.message);
+            }
+        }
+
+        async function loadCustomers() {
+            const response = await apiFetch('/api/musteriler');
+            if (response.ok) {
+                customers = await response.json();
+                populateCustomerSelects();
+            }
+        }
+
+        async function loadDevices() {
+            const response = await apiFetch('/api/cihazlar');
+            if (response.ok) {
+                devices = await response.json();
+            }
+        }
+
+        async function loadServiceRecords() {
+            try {
+                clearMessages();
+                const searchTerm = document.getElementById('searchInput').value;
+                const musteriId = document.getElementById('musteriFilter').value;
+                const durum = document.getElementById('durumFilter').value;
+
+                let url = '/api/servis?';
+                if (searchTerm) url += `q=${encodeURIComponent(searchTerm)}&`;
+                if (musteriId) url += `musteri_id=${musteriId}&`;
+                if (durum) url += `durum=${durum}&`;
+
+                const response = await apiFetch(url);
+                if (!response.ok) throw new Error('Servis kayıtları yüklenemedi');
+
+                serviceRecords = await response.json();
+                renderServiceTable();
+            } catch (error) {
+                showError('Servis kayıtları yüklenirken hata: ' + error.message);
+            }
+        }
+
+        function populateCustomerSelects() {
+            const filterSelect = document.getElementById('musteriFilter');
+            const modalSelect = document.getElementById('musteri_id');
+
+            const options = customers.map(c => `<option value="${c.id}">${c.unvan}</option>`).join('');
+
+            filterSelect.innerHTML = '<option value="">Tüm Müşteriler</option>' + options;
+            modalSelect.innerHTML = '<option value="">Müşteri seçin...</option>' + options;
+        }
+
+        function updateDeviceSelect(musteriId) {
+            const select = document.getElementById('cihaz_id');
+            const customerDevices = devices.filter(d => d.musteri_id == musteriId);
+
+            const options = customerDevices.map(d =>
+                `<option value="${d.id}">${d.seri_no || d.marka || 'Cihaz'} ${d.model || ''}</option>`
+            ).join('');
+
+            select.innerHTML = '<option value="">Cihaz seçin...</option>' + options;
+        }
+
+        function renderServiceTable() {
+            const tbody = document.getElementById('serviceTableBody');
+
+            if (serviceRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Servis kaydı bulunamadı</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = serviceRecords.map(record => {
+                const durumBadge = {
+                    'acik': 'bg-danger',
+                    'devam_ediyor': 'bg-warning',
+                    'kapatildi': 'bg-success'
+                };
+
+                const oncelikBadge = {
+                    'dusuk': 'bg-secondary',
+                    'orta': 'bg-info',
+                    'yuksek': 'bg-warning',
+                    'kritik': 'bg-danger'
+                };
+
+                const actions = isAdmin ? `
+                    <button class="btn btn-sm btn-outline-warning" onclick="changeStatus(${record.id}, '${record.durum}')">
+                        🔄 Durum
+                    </button>
+                ` : '<span class="text-muted">Yetki yok</span>';
+
+                return `
+                    <tr>
+                        <td>${record.id}</td>
+                        <td>${record.musteri_unvan || '-'}</td>
+                        <td>${record.cihaz_seri || '-'}</td>
+                        <td><strong>${record.konu}</strong></td>
+                        <td>
+                            <span class="badge ${durumBadge[record.durum] || 'bg-secondary'}">
+                                ${record.durum.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${oncelikBadge[record.oncelik] || 'bg-secondary'}">
+                                ${record.oncelik.toUpperCase()}
+                            </span>
+                        </td>
+                        <td>${new Date(record.acilis_ts).toLocaleDateString('tr-TR')}</td>
+                        <td>${record.kapanis_ts ? new Date(record.kapanis_ts).toLocaleDateString('tr-TR') : '-'}</td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showAddModal() {
+            if (!isAdmin) {
+                alert('Bu işlem için admin yetkisi gerekli');
+                return;
+            }
+
+            document.getElementById('serviceForm').reset();
+            document.getElementById('oncelik').value = 'orta';
+            document.getElementById('cihaz_id').innerHTML = '<option value="">Cihaz seçin...</option>';
+            serviceModal.show();
+        }
+
+        function changeStatus(recordId, currentStatus) {
+            if (!isAdmin) {
+                alert('Bu işlem için admin yetkisi gerekli');
+                return;
+            }
+
+            document.getElementById('statusRecordId').value = recordId;
+            document.getElementById('yeni_durum').value = currentStatus;
+            statusModal.show();
+        }
+
+        // Form submit handlers
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!isAdmin) {
+                alert('Bu işlem için admin yetkisi gerekli');
+                return;
+            }
+
+            const formData = {
+                musteri_id: document.getElementById('musteri_id').value,
+                cihaz_id: document.getElementById('cihaz_id').value || null,
+                konu: document.getElementById('konu').value,
+                aciklama: document.getElementById('aciklama').value || null,
+                oncelik: document.getElementById('oncelik').value
+            };
+
+            if (!formData.musteri_id || !formData.konu) {
+                showError('Müşteri ve konu alanları zorunludur');
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/api/servis', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) throw new Error('Servis kaydı oluşturulamadı');
+
+                serviceModal.hide();
+                showSuccess('Servis kaydı başarıyla oluşturuldu');
+                loadServiceRecords();
+            } catch (error) {
+                showError('Servis kaydı oluşturulurken hata: ' + error.message);
+            }
+        });
+
+        document.getElementById('statusForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!isAdmin) {
+                alert('Bu işlem için admin yetkisi gerekli');
+                return;
+            }
+
+            const recordId = document.getElementById('statusRecordId').value;
+            const durum = document.getElementById('yeni_durum').value;
+
+            try {
+                const response = await apiFetch(`/api/servis/${recordId}/durum`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ durum })
+                });
+
+                if (!response.ok) throw new Error('Durum güncellenemedi');
+
+                statusModal.hide();
+                showSuccess('Servis durumu başarıyla güncellendi');
+                loadServiceRecords();
+            } catch (error) {
+                showError('Durum güncellenirken hata: ' + error.message);
+            }
+        });
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadServiceRecords();
+        });
+
+        document.getElementById('musteriFilter').addEventListener('change', loadServiceRecords);
+        document.getElementById('durumFilter').addEventListener('change', loadServiceRecords);
+
+        // Müşteri değiştiğinde cihazları güncelle
+        document.getElementById('musteri_id').addEventListener('change', (e) => {
+            updateDeviceSelect(e.target.value);
+        });
+    </script>
+</body>
+
+</html>
